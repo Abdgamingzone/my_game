@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlyJet</title>
+    <style>
+      /* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+
+    /* Add black border */
+    border: 25px solid #000; /* Solid black border */
+    border-radius: 0px; /* Smooth rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8),
+                0 0 25px rgba(0, 0, 0, 0.6); /* Subtle shadow for depth */
+}
+
+video.bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+/* Sidebar for Player Info */
+.sidebar {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 200px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ff9800;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+}
+.sidebar h3 {
+    color: #ff9800;
+    margin-bottom: 10px;
+    font-size: 2.0 rem;
+}
+.sidebar p {
+    font-size: 1.1rem;
+    margin: 8px 0;
+}
+
+/* Game Container */
+.game-container {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 200px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #28a745;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+}
+.multiplier {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #28a745;
+    margin: 20px 0;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0%, 100% { color: #28a745; }
+    50% { color: #ff9800; }
+}
+.controls input {
+    padding: 10px;
+    font-size: 1rem;
+    width: 70%;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.controls button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #fff;
+}
+.controls button#startBtn {
+    background-color: #007bff;
+}
+.controls button#cashOutBtn {
+    background-color: #ff9800;
+}
+.controls button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+/* Last Multipliers Panel */
+.last-multipliers {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 150px;
+    height: 250px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #ff9800;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    overflow-y: scroll;
+}
+
+/* Plane Animation */
+.plane {
+    position: absolute;
+    width: 230px; /* Larger plane */
+    height: 120px; /* Larger plane */
+    bottom: 30%; /* Plane starts 45% from the bottom */
+    left: 16%; /* Starts from the left side */
+    transition: transform 0.7s;
+}
+
+/* Explosion Image */
+#explosion {
+    display: none;
+    position: absolute;
+    width: 250px;
+    height: 250px;
+}
+
+
+/* Media Queries for Smaller Screens */
+  @media (max-width: 1300px) {
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+
+    /* Add black border */
+    border: 5px solid #000; /* Solid black border */
+    border-radius: 0px; /* Smooth rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8),
+                0 0 25px rgba(0, 0, 0, 0.6); /* Subtle shadow for depth */
+}
+
+/* Sidebar for Player Info */
+.sidebar {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 90px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ff9800;
+    border-radius: 3px;
+    padding: 3px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+}
+.sidebar h3 {
+    color: #ff9800;
+    margin-bottom: 3px;
+    font-size: 1.0rem;
+}
+.sidebar p {
+    font-size: 0.6rem;
+    margin: 8px 0;
+}
+
+/* Game Container */
+.game-container {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #28a745;
+    border-radius: 3px;
+    padding: 3px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+}
+.multiplier {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #28a745;
+    margin: 5px 0;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0%, 100% { color: #28a745; }
+    50% { color: #ff9800; }
+}
+.controls input {
+    padding: 2px;
+    font-size: 0.7rem;
+    width: 70%;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+    margin-bottom: 3px;
+    text-align: center;
+}
+.controls button {
+    padding: 2px 3px;
+    font-size: 0.7rem;
+    margin: 5px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #fff;
+}
+.controls button#startBtn {
+    background-color: #007bff;
+}
+.controls button#cashOutBtn {
+    background-color: #ff9800;
+}
+.controls button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+/* Last Multipliers Panel */
+.last-multipliers {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 80px;
+    height: 290px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #ff9800;
+    border-radius: 3px;
+    padding: 3px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    overflow-y: scroll;
+}
+.last-multipliers p {
+    color: #ff9800;
+    margin-bottom: 3px;
+    font-weight: bold;
+}
+
+/* Plane Animation */
+.plane {
+    position: absolute;
+    width: 200px; /* Larger plane */
+    height: 100px; /* Larger plane */
+    bottom: 35%; /* Plane starts 45% from the bottom */
+    left: 1%; /* Starts from the left side */
+    transition: transform 0.7s;
+}
+
+/* Explosion Image */
+#explosion {
+    display: none;
+    position: absolute;
+    width: 200px;
+    height: 100px;
+}
+
+  @media (max-width: 480px) {
+
+
+    body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+
+    /* Add black border */
+    border: 5px solid #000; /* Solid black border */
+    border-radius: 0px; /* Smooth rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8),
+                0 0 25px rgba(0, 0, 0, 0.6); /* Subtle shadow for depth */
+}
+
+/* Sidebar for Player Info */
+.sidebar {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 90px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ff9800;
+    border-radius: 3px;
+    padding: 3px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+}
+.sidebar h3 {
+    color: #ff9800;
+    margin-bottom: 3px;
+    font-size: 1.0rem;
+}
+.sidebar p {
+    font-size: 0.6rem;
+    margin: 8px 0;
+}
+
+/* Game Container */
+.game-container {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #28a745;
+    border-radius: 3px;
+    padding: 3px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+}
+.multiplier {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #28a745;
+    margin: 5px 0;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0%, 100% { color: #28a745; }
+    50% { color: #ff9800; }
+}
+.controls input {
+    padding: 2px;
+    font-size: 0.7rem;
+    width: 70%;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+    margin-bottom: 3px;
+    text-align: center;
+}
+.controls button {
+    padding: 2px 3px;
+    font-size: 0.7rem;
+    margin: 5px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #fff;
+}
+.controls button#startBtn {
+    background-color: #007bff;
+}
+.controls button#cashOutBtn {
+    background-color: #ff9800;
+}
+.controls button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+/* Last Multipliers Panel */
+.last-multipliers {
+    position: absolute;
+    top: 5px;
+    right:0px;
+    width: 43px;
+    height: 120px; /* Reduced from 190px */
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #ff9800;
+    border-radius: 3px;
+    padding: 0px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    overflow-y: scroll;
+    font-size: 10px;
+}
+.last-multipliers p {
+    color: #ff9800;
+    margin-bottom: 3px;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+/* Plane Animation */
+.plane {
+    position: absolute;
+    width: 140px; /* Larger plane */
+    height: 80px; /* Larger plane */
+    bottom: 35%; /* Plane starts 45% from the bottom */
+    left: 1%; /* Starts from the left side */
+    transition: transform 0.7s;
+}
+
+/* Explosion Image */
+#explosion {
+    display: none;
+    position: absolute;
+    width: 140px;
+    height: 80px;
+}
+
+    </style>
+</head>
+<body>
+
+
+   <!-- Background Video -->
+    <video class="bg-video" autoplay loop muted>
+        <source src="C:/Users/DELL/OneDrive/Desktop/My Game/Assets/Images/bg video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+
+    <!-- Sidebar for Player Info -->
+    <div class="sidebar">
+        <h3>Player Info</h3>
+        <!-- <p><strong>Player ID:</strong> <span id="playerName">   </span></p> -->
+        <p><strong>Total Amount:</strong> <span id="totalAmount">0.00</span></p>
+    </div>
+
+    <!-- Main Game Container -->
+    <div class="game-container">
+        <div class="multiplier" id="multiplier">1.00x</div>
+        <div class="controls">
+            <input type="number" id="bet" placeholder="Min bet 3" min="3">
+            <br>
+            <button id="startBtn">Start</button>
+            <button id="cashOutBtn" disabled>Cash Out</button>
+        </div>
+        <div class="message" id="message"></div>
+    </div>
+
+    <!-- Last Multipliers Panel -->
+    <div class="last-multipliers">
+        <p>Last Crashes</p>
+        <p id="crashHistory"></p>
+    </div>
+
+    <!-- Plane -->
+    <img src="C:/Users/DELL/OneDrive/Desktop/My Game/Assets/Images/plan.png" alt="Plane" class="plane" id="plane">
+
+    <!-- Explosion Image -->
+    <img src="C:/Users/DELL/OneDrive/Desktop/flyjet 2/boom.png" alt="Explosion" id="explosion" style="display: none; position: absolute; ">
+
+    <!-- Audio -->
+    <audio id="backgroundMusic" loop>
+        <source src="C:/Users/DELL/OneDrive/Desktop/My Game/Assets\Music/game_bg_music.MP3" type="audio/mpeg">
+    </audio>
+    <audio id="crashSound">
+        <source src="C:/Users/DELL/OneDrive/Desktop/My Game/Assets/Music/boom sound.mp3" type="audio/mpeg">
+    </audio>
+
+<script>
+    // DOM Elements
+    const multiplierDisplay = document.getElementById('multiplier');
+    const startBtn = document.getElementById('startBtn');
+    const cashOutBtn = document.getElementById('cashOutBtn');
+    const betInput = document.getElementById('bet');
+    const messageDisplay = document.getElementById('message');
+    const crashHistory = document.getElementById('crashHistory');
+    const totalAmountDisplay = document.getElementById('totalAmount');
+    const plane = document.getElementById('plane');
+    const explosion = document.getElementById('explosion');
+
+    // Sounds
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    const crashSound = document.getElementById('crashSound');
+
+    // Game Variables
+    let totalAmount = 15; // Player's total money
+    let currentBet = 0;
+    let currentMultiplier = 1.0;
+    let running = false;
+    let playerCashedOut = false;
+    let interval = null;
+    let planeInterval = null;
+    let crashMultiplier = 0; // Random crash multiplier
+
+
+// Play the background music after the user clicks the start button
+    startBtn.addEventListener('click', () => {
+    if (running) return;
+
+    // Start the background music when the game starts
+    backgroundMusic.play();
+
+  
+});
+
+
+    // Function to generate random crash multiplier
+    function generateCrashMultiplier() {
+        const chance = Math.random();
+        if (chance < 0.9) {
+            // 90% chance to crash between 1.00 and 2.70
+            return (Math.random() * 1.7 + 1).toFixed(2);
+        } else {
+            // 10% chance to crash between 2.71 and 15.00
+            return (Math.random() * 12.29 + 2.71).toFixed(2);
+        }
+    }
+
+    // Animate Plane
+    function animatePlane() {
+        let position = 0;
+        let curveFactor = 10;
+        let verticalOffset = 0;
+        let upDownMotion = false;
+
+        planeInterval = setInterval(() => {
+            const screenWidth = window.innerWidth;
+
+            if (position > screenWidth * 0.5) {
+                if (!upDownMotion) {
+                    upDownMotion = true;
+                    position = screenWidth * 0.5;
+                }
+            }
+
+            if (upDownMotion) {
+                verticalOffset += 0.5;
+                curveFactor = Math.sin(verticalOffset / 10) * 100;
+                plane.style.transform = `translate(${position}px, ${curveFactor}px)`;
+            } else {
+                position += 5;
+                curveFactor = Math.sin(position / 100) * 50;
+                plane.style.transform = `translate(${position}px, ${curveFactor}px)`;
+            }
+        }, 50);
+    }
+
+    // Crash Plane
+function crashPlane() {
+    clearInterval(planeInterval);
+
+    const planeRect = plane.getBoundingClientRect();
+    explosion.style.left = `${planeRect.left}px`;
+    explosion.style.top = `${planeRect.top}px`;
+    explosion.style.display = "block"; // Show explosion
+
+    crashSound.play();
+    plane.style.display = "none"; // Hide plane during explosion
+
+    // After 2 seconds, hide explosion
+    setTimeout(() => {
+        explosion.style.display = "none"; // Hide explosion
+    }, 2000); // Explosion stays for 2 seconds
+
+    // After 5 seconds, reset the plane position
+    setTimeout(() => {
+        plane.style.display = "block"; // Show the plane again
+        plane.style.transform = "translate(0px, 0px)"; // Reset plane position
+        plane.style.transition = "none"; // Disable transition during reset
+        // Wait for the next frame to make sure the plane jumps to position
+        setTimeout(() => {
+            plane.style.transition = "transform 2.3s"; // Re-enable plane animation transition
+
+            // Enable the start button and bet input for a new game
+            startBtn.disabled = false;
+            betInput.disabled = false; // In case you disable it elsewhere in the game
+            messageDisplay.innerHTML = "Place your next bet!";
+        }, 10);
+    }, 2000); // Reset plane position after 5 seconds
+}
+
+
+
+    // Start Button Logic
+startBtn.addEventListener('click', () => {
+    if (running) return;
+
+    currentBet = parseFloat(betInput.value);
+
+    if (isNaN(currentBet) || currentBet < 1000000000000 || currentBet > totalAmount) {
+        messageDisplay.innerHTML = "Recharge your account!";
+        return;
+    }
+
+    totalAmount -= currentBet;
+    totalAmountDisplay.innerHTML = totalAmount.toFixed(2);
+
+    running = true;
+    playerCashedOut = false;
+    cashOutBtn.disabled = false;
+    startBtn.disabled = true;
+    messageDisplay.innerHTML = "Game Started!";
+    currentMultiplier = 1.0;
+    multiplierDisplay.innerHTML = `${currentMultiplier.toFixed(2)}x`;
+
+    // Generate random crash multiplier
+    crashMultiplier = parseFloat(generateCrashMultiplier());
+
+    // Animate the Plane
+    animatePlane();
+
+    interval = setInterval(() => {
+        if (!running) return;
+
+        currentMultiplier += 0.01;
+        multiplierDisplay.innerHTML = `${currentMultiplier.toFixed(2)}x`;
+
+        // Check if plane crashes
+        if (currentMultiplier >= crashMultiplier) {
+            running = false;
+            clearInterval(interval);
+            cashOutBtn.disabled = true;
+            startBtn.disabled = false;
+            messageDisplay.innerHTML = `Plane crashed at ${crashMultiplier.toFixed(2)}x!`;
+
+            // Add crash multiplier to history
+            crashHistory.innerHTML = `<li>${crashMultiplier.toFixed(2)}x</li>` + crashHistory.innerHTML;
+            crashPlane();
+        }
+    }, 100);
+});
+
+// Cash Out Logic
+cashOutBtn.addEventListener('click', () => {
+    if (!running || playerCashedOut) return;
+
+    playerCashedOut = true; // Prevent further cashouts
+    cashOutBtn.disabled = true;
+
+    const winnings = currentBet * currentMultiplier;
+    totalAmount += winnings;
+    totalAmountDisplay.innerHTML = totalAmount.toFixed(2);
+
+    // Only update message, do not update crash history with "Cashed Out"
+    messageDisplay.innerHTML = `You cashed out at ${currentMultiplier.toFixed(2)}x! Your winnings: ${winnings.toFixed(2)}`;
+});
+
+
+
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
